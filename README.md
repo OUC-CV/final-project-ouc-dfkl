@@ -27,7 +27,7 @@ SRCNN模型分为三部分：特征提取层、非线性映射层和网络重建
 重建层：借鉴传统超分的纯插值法做重建。这一层没有ReLU层。<br>
 公式：<br>
 ![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/3.png)<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/4.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/4.png)<br>
 
 一开始，我运行super_resolutiontrain.py报错说输入张量与目标张量形状不一致。后面使用 torch.nn.functional.interpolate 函数对输出 x 进行插值操作，使得输入图像和输出图像形状一致。<br>
 ```python
@@ -51,9 +51,9 @@ class SRCNN(nn.Module):
 YCbCr颜色空间将颜色信息分成亮度（Y）和两个色度分量（Cb和Cr）。Y表示图像的亮度，包含图像的主要细节信息或灰度级别。Cb表示图像中的蓝色色度信息，即颜色的蓝色成分。Cr表示图像中的红色色度信息，即颜色的红色成分。<br>
 在utils.py文件中添加convert_rgb_to_y，convert_rgb_to_ycbcr和convert_ycbcr_to_rgb三个函数。convert_rgb_to_y函数用于将RGB图像转换为亮度（Y）通道，convert_rgb_to_ycbcr函数用于将RGB图像转换为YCbCr颜色空间，convert_ycbcr_to_rgb函数用于将YCbCr图像转换回RGB颜色空间。<br>
 从RGB到YCbCr公式：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/5.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/5.png)<br>
 从YCbCr到RGB公式：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/6.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/6.png)<br>
 3．应用SRCNN技术于HDR重建<br>
 一开始，运行predict.py发现super_resolution函数无法正确地处理输入图像，显示图像没有image.width和image.height属性。原因是我输入的图像ldr是一个通过OpenCV加载的图像，它是NumPy 数组形式。我应该将其先转换为PIL图像对象：<br>
 ```python
@@ -66,8 +66,8 @@ YCbCr颜色空间将颜色信息分成亮度（Y）和两个色度分量（Cb和
 ldr_super_resolution_resized = cv2.resize(ldr_super_resolution, (1024, 768))
 ```
 在ldr图像上使用超分辨率后进行HDR重建：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/7.png)
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/8.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/7.png)<br>
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/8.png)<br>
 
 
 接着，想在经过低光照增强的图上使用超分辨率技术。发现ldr_enhance是一个 NumPy 数组和super_resolution函数输入图像类型不一致，要将其先转换为PIL图像对象，并且确保 ldr_enhance中的值在[0, 1]范围内。如果超出此范围，需要在传递给PIL前进行归一化处理。<br>
@@ -76,17 +76,17 @@ image = pil_image.fromarray((ldr_enhance * 255).astype(np.uint8))
 ```
 
 在ldr_enhance图像上使用超分辨率后进行HDR重建：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/9.png)
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/10.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/9.png)<br>
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/10.png)<br>
 
 
 #### 范晓颖：
 我们基于已有的从低动态范围(LDR)输入图像重建高动态范围(HDR)图像的方法基础上进行了组合式创新，我主要负责对原有代码进行改进以及增加低光照增强技术改善输入图像的光照条件，以便更好的进行hdr重建。<br>
 在最开始我运行原有代码时发现运行效果不是很好，重建后的图像与输入图像差别不大，多次修改阈值后发现当tau参数较大时，重建图像与输入图像相同；tau参数较小时，重建图像呈现紫色。<br>
-tau=0.95时：
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/11.png)
-tau=0.05:
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/12.png)
+tau=0.95时：<br>
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/11.png)<br>
+tau=0.05:<br>
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/12.png)<br>
 经过调查发现:<br>
 当 tau 较大时，计算得到的 alpha 值较小，意味着输入图像的平方项（input_image ** 2）的影响较小。这种情况下，重建图像与输入图像相似，因为 alpha 的影响较小，重建的颜色和亮度更接近原始输入。<br>
 当 tau 较小时，计算得到的 alpha 值可能较大。这导致重建的 HDR 图像在混合过程中更多地受到输入图像平方项的影响。输入图像中较暗区域的平方项可能会导致颜色通道不平衡，尤其是在红色和蓝色通道上，这可能表现为图像呈现紫色。<br>
@@ -102,7 +102,7 @@ def color_balance(image):
     balanced_image = balanced_image / 255.0
     return balanced_image
 ```
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/13.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/13.png)<br>
 但是直方图均衡化可能会导致整体颜色偏移，特别是在亮度和对比度变化较大的图像上，最终得到的图像效果仍然不好。后来，我尝试使用更高级的方法——自适应直方图均衡化，它能更好地保持图像的整体色调，最终得到了效果较好的hdr重建图像。<br>
 下面是改进后的 color_balance 函数，使用自适应直方图均衡化 (CLAHE) 来处理颜色通道：<br>
 ```python
@@ -120,11 +120,11 @@ def color_balance(image):
 return balanced_image
 ```
 得到的结果如下：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/14.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/14.png)<br>
 原有代码经过改进后得到的训练和验证损失函数图像如下：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/15.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/15.png)<br>
 为了改善视觉质量，更好地反映真实世界场景的光照变化，生成高质量HDR图像，我增加了低光照增强功能。该功能的添加我参考了论文《Zero-Reference Deep Curve Estimation for Low-Light Image Enhancement》，将该论文提出的低光照增强方法组合到我们原有代码上，得到如下结果：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/16.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/16.png)<br>
 可以看出，低光照增强后的图像相比输入图像更加明亮了，但过于明亮会导致hdr重建后的图像对比度降低，可能会造成颜色饱和度下降或色彩偏差，可能会导致图像中的高光区域细节丢失，影响HDR重建后的图像质量和视觉观感。<br>
 因此需要降低光照增强的亮度，修改模型输出端的缩放因子来控制亮度增强强度：<br>
 ```python
@@ -142,7 +142,7 @@ return balanced_image
         return enhance_image_1,enhance_image,r
 ```
 经过改进得到如下结果：<br>
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/17.png)
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/17.png)<br>
 可以看出，输入图像经过低光照增强后能更好的显示出图像亮度和对比度的变化，能够恢复图像中的细微纹理，使得HDR重建图像效果更好。<br>
 
 ## 结果：
@@ -158,7 +158,7 @@ return balanced_image
 #### 范晓颖：
 
 ​&emsp;&emsp;我主要负责对原有代码进行改进以及增加低光照增强技术改善输入图像的光照条件，以便更好的进行hdr重建。在此次实验中，我们基于已有的从低动态范围(LDR)输入图像重建高动态范围(HDR)图像的方法基础上进行了组合式创新，添加了低光照增强、高分辨率、去噪等功能，将多种图像处理技术整合到一个统一的框架中，不仅提高了图像的视觉质量，还增强了模型的适用性和灵活性。<br>
-在实验过程中，我发现可以进一步改进模型以提高模型在现实生活中解决实际问题的能力，我搜集资料得到了几种可行的方案：a.可以利用Transformer模型的注意力机制改进HDR重建模型的特征提取和处理能力;b.可以使用DenseNet的密集连接机制改进HDR重建模型的参数效率和梯度流动；c.结合GANs，通过生成对抗训练提高HDR图像的质量；d.可以结合MobileNets和SqueezeNet设计高效的HDR重建模型，使其适合移动设备和实时应用。在之后的日子里我会继续完善和改进这个实验，希望能达到满意的效果。
+在实验过程中，我发现可以进一步改进模型以提高模型在现实生活中解决实际问题的能力，我搜集资料得到了几种可行的方案：a.可以利用Transformer模型的注意力机制改进HDR重建模型的特征提取和处理能力;b.可以使用DenseNet的密集连接机制改进HDR重建模型的参数效率和梯度流动；c.结合GANs，通过生成对抗训练提高HDR图像的质量；d.可以结合MobileNets和SqueezeNet设计高效的HDR重建模型，使其适合移动设备和实时应用。在之后的日子里我会继续完善和改进这个实验，希望能达到满意的效果。<br>
 
 ## 个人贡献声明：
 邓棋丹：<br>
@@ -167,12 +167,12 @@ return balanced_image
 蒯奇：<br>
 
 ## 引用参考：
->[1] Dong C , Loy C C , He K ,et al.Learning a Deep Convolutional Network for Image Super-Resolution[C]//ECCV.Springer International Publishing, 2014.DOI:10.1007/978-3-319-10593-2_13.
->[2] Dong C , Loy C C , Tang X .Accelerating the Super-Resolution Convolutional Neural Network[J].Springer, Cham, 2016.DOI:10.1007/978-3-319-46475-6_25.
->[3] Kim J , Lee J K , Lee K M .Accurate Image Super-Resolution Using Very Deep Convolutional Networks[J].IEEE, 2016.DOI:10.1109/CVPR.2016.182.
->[4] Lim B, Son S, Kim H, et al. Enhanced deep residual networks for single image super-resolution[C]//Proceedings of the IEEE conference on computer vision and pattern recognition workshops. 2017: 136-144.
->[5] Ledig C, Theis L, Huszár F, et al. Photo-realistic single image super-resolution using a generative adversarial network[C]//Proceedings of the IEEE conference on computer vision and pattern recognition. 2017: 4681-4690.
->[6] C. Guo et al., "Zero-Reference Deep Curve Estimation for Low-Light Image Enhancement," 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 2020, pp. 1777-1786, doi: 10.1109/CVPR42600.2020.00185.
->[7] Gabriel Eilertsen, Joel Kronander, Gyorgy Denes, Rafał K. Mantiuk, and Jonas Unger. 2017. HDR image reconstruction from a single exposure using deep CNNs. ACM Trans. Graph. 36, 6, Article 178 (December 2017), 15 pages.
->[8] Nima Khademi Kalantari and Ravi Ramamoorthi. 2017. Deep high dynamic range imaging of dynamic scenes. ACM Trans. Graph. 36, 4, Article 144 (August 2017), 12 pages. 
->[9] Zhang K , Zuo W , Chen Y ,et al.Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising[J].IEEE Transactions on Image Processing, 2016, 26(7):3142-3155.DOI:10.1109/TIP.2017.2662206.
+>[1] Dong C , Loy C C , He K ,et al.Learning a Deep Convolutional Network for Image Super-Resolution[C]//ECCV.Springer International Publishing, 2014.DOI:10.1007/978-3-319-10593-2_13.<br>
+>[2] Dong C , Loy C C , Tang X .Accelerating the Super-Resolution Convolutional Neural Network[J].Springer, Cham, 2016.DOI:10.1007/978-3-319-46475-6_25.<br>
+>[3] Kim J , Lee J K , Lee K M .Accurate Image Super-Resolution Using Very Deep Convolutional Networks[J].IEEE, 2016.DOI:10.1109/CVPR.2016.182.<br>
+>[4] Lim B, Son S, Kim H, et al. Enhanced deep residual networks for single image super-resolution[C]//Proceedings of the IEEE conference on computer vision and pattern recognition workshops. 2017: 136-144.<br>
+>[5] Ledig C, Theis L, Huszár F, et al. Photo-realistic single image super-resolution using a generative adversarial network[C]//Proceedings of the IEEE conference on computer vision and pattern recognition. 2017: 4681-4690.<br>
+>[6] C. Guo et al., "Zero-Reference Deep Curve Estimation for Low-Light Image Enhancement," 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 2020, pp. 1777-1786, doi: 10.1109/CVPR42600.2020.00185.<br>
+>[7] Gabriel Eilertsen, Joel Kronander, Gyorgy Denes, Rafał K. Mantiuk, and Jonas Unger. 2017. HDR image reconstruction from a single exposure using deep CNNs. ACM Trans. Graph. 36, 6, Article 178 (December 2017), 15 pages.<br>
+>[8] Nima Khademi Kalantari and Ravi Ramamoorthi. 2017. Deep high dynamic range imaging of dynamic scenes. ACM Trans. Graph. 36, 4, Article 144 (August 2017), 12 pages. <br>
+>[9] Zhang K , Zuo W , Chen Y ,et al.Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising[J].IEEE Transactions on Image Processing, 2016, 26(7):3142-3155.DOI:10.1109/TIP.2017.2662206.<br>
