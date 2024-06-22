@@ -234,10 +234,10 @@ Img = np.expand_dims(Img, 0) 等等<br>
 
 
 ## 个人贡献声明：
-邓棋丹：组合创新中SRCNN部分，项目报告撰写以及视频制作<br>
-范晓颖：改进原有代码、增加低光照增强技术、项目报告撰写<br>
-李奇静：<br>
-蒯奇：<br>
+邓棋丹：组合创新中的SRCNN部分，项目报告撰写以及视频制作<br>
+范晓颖：改进原有代码、增加低光照增强技术、项目报告撰写和视频录制<br>
+李奇静：组合创新中的去噪部分，项目报告撰写以及视频录制<br>
+蒯奇：组合创新中的去噪部分，项目报告撰写以及视频录制<br>
 
 ## 引用参考：
 >[1] Dong C , Loy C C , He K ,et al.Learning a Deep Convolutional Network for Image Super-Resolution[C]//ECCV.Springer International Publishing, 2014.DOI:10.1007/978-3-319-10593-2_13.<br>
