@@ -146,13 +146,21 @@ return balanced_image
 可以看出，输入图像经过低光照增强后能更好的显示出图像亮度和对比度的变化，能够恢复图像中的细微纹理，使得HDR重建图像效果更好。<br>
 
 ## 结果：
-![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/18png)<br>
+![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/18.png)<br>
 ![](https://github.com/OUC-CV/final-project-ouc-dfkl/blob/main/image/19.png)<br>
 该结果图第一行是输入的ldr图像、重建后的图像以及理想图。<br>
 第二行是使用低光照增强技术后的ldr图像、重建后的图像以及理想图。<br>
 第三行是使用去噪技术后的ldr图像、重建后的图像以及理想图。<br>
 第四行是使用SRCNN技术后的ldr图像、重建后的图像以及理想图。<br>
 第五行是对使用低光照增强技术后的ldr图像使用SRCNN技术后的图像、重建后的图像以及理想图。<br>
+<br>
+数据集的量化信息：<br>
+数据集划分比例：80%训练集和20%测试集<br>
+样本数量：1110个样本<br>
+特征数量：图像的尺寸为256*256和颜色通道数为3个通道<br>
+训练时间：训练时间大约6个小时<br>
+
+
 
 
 ## 总结和讨论：
